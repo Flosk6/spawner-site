@@ -12,7 +12,7 @@ import { LICENSE_URL } from '../lib/site.ts';
 export const CHECKED = { iso: '2026-10-09', text: '9 October 2026' };
 
 /** The release of Spawner the page describes. */
-export const SPAWNER_VERSION = '2.1.0';
+export const SPAWNER_VERSION = '2.2.0';
 
 export const TITLE = 'Self-hosted preview environments: Spawner and the alternatives';
 
