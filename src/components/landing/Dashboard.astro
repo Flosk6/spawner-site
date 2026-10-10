@@ -1,0 +1,109 @@
+---
+/**
+ * The dashboard's Environments page, in the theme the page shows: a
+ * screenshot of each theme, the other one hidden (and, being lazy, never
+ * downloaded). On a phone the table is too small to read, so the caption
+ * links to the screenshot at its full size, which a phone can zoom into.
+ */
+import { Picture } from 'astro:assets';
+import { dashboard, fullSize } from '../../data/screenshots';
+
+const sizes = '(min-width: 72.5rem) 69.5rem, calc(100vw - 2rem)';
+const fullLight = await fullSize(dashboard.light);
+const fullDark = await fullSize(dashboard.dark);
+---
+
+<section class="section section-alt" aria-labelledby="dashboard-title">
+  <div class="wrap">
+    <h2 class="section-title" id="dashboard-title">Every branch in one dashboard</h2>
+    <p class="section-lede">
+      Who started each environment, what it uses and when it sleeps. Each one has its logs with an error filter, its CPU and memory over time, a
+      timeline of crashes, and a terminal into any service.
+    </p>
+    <figure>
+      <Picture class="shot shot-light" src={dashboard.light} alt={dashboard.alt} formats={['avif', 'webp']} widths={[720, 1080, 1440, 2160]} sizes={sizes} />
+      <Picture class="shot shot-dark" src={dashboard.dark} alt={dashboard.alt} formats={['avif', 'webp']} widths={[720, 1080, 1440, 2160]} sizes={sizes} />
+      <figcaption>
+        {dashboard.caption}
+        <a class="full-light" href={fullLight}>Open it at full size</a>
+        <a class="full-dark" href={fullDark}>Open it at full size</a>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  figure {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+  }
+
+  figure :global(.shot) {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--sp-border);
+    border-radius: 10px;
+    box-shadow: var(--sp-shadow);
+  }
+
+  figure :global(.shot-dark) {
+    display: none;
+  }
+
+  :global(:root[data-theme='dark']) figure :global(.shot-dark) {
+    display: block;
+  }
+
+  :global(:root[data-theme='dark']) figure :global(.shot-light) {
+    display: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) figure :global(.shot-dark) {
+      display: block;
+    }
+
+    :global(:root:not([data-theme='light'])) figure :global(.shot-light) {
+      display: none;
+    }
+  }
+
+  figcaption {
+    color: var(--sp-text-3);
+    font-size: 0.875rem;
+  }
+
+  figcaption a {
+    color: var(--sp-text-2);
+    font-weight: 600;
+  }
+
+  figcaption a:hover {
+    color: var(--sp-text);
+  }
+
+  .full-dark {
+    display: none;
+  }
+
+  :global(:root[data-theme='dark']) .full-dark {
+    display: inline;
+  }
+
+  :global(:root[data-theme='dark']) .full-light {
+    display: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .full-dark {
+      display: inline;
+    }
+
+    :global(:root:not([data-theme='light'])) .full-light {
+      display: none;
+    }
+  }
+</style>

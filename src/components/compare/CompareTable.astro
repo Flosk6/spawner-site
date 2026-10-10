@@ -1,0 +1,161 @@
+---
+/**
+ * One family of tools next to Spawner, criterion by criterion. A table on
+ * wide screens; on narrow ones, each criterion becomes a block that lists
+ * every tool's answer under its name, so that nothing scrolls sideways.
+ * The explicit roles keep the table's semantics for screen readers when
+ * the CSS changes how its rows are displayed, and the names repeated in
+ * each cell are hidden from them, as the column headers already say it.
+ */
+import { CRITERIA, codeSpans, SPAWNER, type Group } from '../../data/compare';
+
+interface Props {
+  group: Group;
+}
+
+const { group } = Astro.props;
+const tools = [SPAWNER, ...group.tools];
+---
+
+<table role="table" aria-labelledby={`${group.id}-title`}>
+  <thead role="rowgroup">
+    <tr role="row">
+      <th role="columnheader" scope="col"><span class="sr-only">Criterion</span></th>
+      {
+        tools.map((tool) => (
+          <th role="columnheader" scope="col" class:list={{ own: tool === SPAWNER }}>
+            {tool.name}
+          </th>
+        ))
+      }
+    </tr>
+  </thead>
+  <tbody role="rowgroup">
+    {
+      CRITERIA.map((criterion) => (
+        <tr role="row">
+          <th role="rowheader" scope="row">
+            {criterion.label}
+          </th>
+          {tools.map((tool) => (
+            <td role="cell" class:list={{ own: tool === SPAWNER }}>
+              <span class="name" aria-hidden="true">
+                {tool.name}
+              </span>
+              <span>{codeSpans(tool.cells[criterion.id]).map((span) => (span.code ? <code>{span.text}</code> : span.text))}</span>
+            </td>
+          ))}
+        </tr>
+      ))
+    }
+  </tbody>
+</table>
+
+<style>
+  table {
+    width: 100%;
+    margin-top: 1.5rem;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  th,
+  td {
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid var(--sp-border);
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: break-word;
+  }
+
+  thead th {
+    border-bottom: 2px solid var(--sp-border-strong);
+    color: var(--sp-text);
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  thead th:first-child {
+    width: 13rem;
+  }
+
+  tbody th {
+    color: var(--sp-text);
+    font-weight: 700;
+  }
+
+  td {
+    color: var(--sp-text-2);
+  }
+
+  .own {
+    background: var(--sp-surface);
+  }
+
+  .name {
+    display: none;
+  }
+
+  code {
+    color: var(--sp-text);
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 60rem) {
+    table,
+    thead,
+    tbody,
+    tr,
+    th,
+    td {
+      display: block;
+    }
+
+    thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    }
+
+    tr {
+      padding-block: 1rem;
+      border-top: 1px solid var(--sp-border);
+    }
+
+    tr:last-child {
+      border-bottom: 1px solid var(--sp-border);
+    }
+
+    tbody th {
+      padding: 0 0 0.5rem;
+      border: 0;
+      font-size: 1rem;
+    }
+
+    td {
+      display: grid;
+      grid-template-columns: 7rem minmax(0, 1fr);
+      gap: 1rem;
+      padding: 0.5rem 0.75rem;
+      border: 0;
+    }
+
+    .name {
+      display: block;
+      color: var(--sp-text);
+      font-weight: 700;
+    }
+  }
+
+  @media (max-width: 26rem) {
+    td {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.15rem;
+    }
+  }
+</style>

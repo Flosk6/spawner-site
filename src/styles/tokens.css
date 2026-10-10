@@ -1,0 +1,124 @@
+/*
+ * Spawner's design tokens: the dashboard's (apps/web/src/styles/tokens.css in
+ * the Spawner repository), shared by the home page and the docs. Light by
+ * default; dark when the page carries data-theme="dark", or, before the
+ * theme script runs, when the system asks for it. Every text token keeps a
+ * contrast of at least 4.5:1 on the surfaces it sits on.
+ */
+:root {
+  --sp-bg: #f6f6f9;
+  --sp-surface: #ffffff;
+  --sp-surface-2: #f3f3f7;
+  --sp-border: #e4e4ea;
+  --sp-border-strong: #d4d4dc;
+  --sp-text: #17161d;
+  --sp-text-2: #4b4a55;
+  --sp-text-3: #6b6a76;
+  --sp-accent: #574b89;
+  --sp-accent-hover: #4b4079;
+  --sp-accent-fg: #ffffff;
+  --sp-accent-text: #574b89;
+  --sp-accent-soft: #f1effa;
+  --sp-accent-border: #d6d1ec;
+  --sp-ring: #6e54ff;
+  --sp-mark: #6e54ff;
+  --sp-ok: #16a34a;
+  --sp-ok-text: #15803d;
+  --sp-ok-soft: #ecfdf3;
+  --sp-ok-border: #bbf7d0;
+  --sp-info: #2563eb;
+  --sp-info-text: #1d4ed8;
+  --sp-info-soft: #eff6ff;
+  --sp-info-border: #bfdbfe;
+  --sp-sleep: #8b84b8;
+  --sp-sleep-text: #5b5785;
+  --sp-sleep-soft: #f3f2f8;
+  --sp-sleep-border: #dcd9ea;
+  --sp-shadow: 0 10px 28px -8px rgba(23, 22, 29, 0.18), 0 2px 6px rgba(23, 22, 29, 0.06);
+
+  /* The terminal stays dark in both themes, like the dashboard's. */
+  --sp-term-bg: #0d0c12;
+  --sp-term-border: #26252e;
+  --sp-term-border-strong: #35343f;
+  --sp-term-text: #e4e3ec;
+  --sp-term-dim: #8a8899;
+  --sp-term-prompt: #a99dff;
+  --sp-term-ok: #4ade80;
+  --sp-term-url: #67e8f9;
+  --sp-term-err: #f87171;
+  --sp-term-warn: #fbbf24;
+  --sp-term-info: #60a5fa;
+
+  --sp-font: 'Overpass Variable', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --sp-font-mono: 'Overpass Mono Variable', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --sp-font-brand: 'Chakra Petch', 'Overpass Variable', sans-serif;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --sp-bg: #0e0d13;
+  --sp-surface: #15141b;
+  --sp-surface-2: #1b1a22;
+  --sp-border: #26252e;
+  --sp-border-strong: #35343f;
+  --sp-text: #edecf3;
+  --sp-text-2: #b6b5c2;
+  --sp-text-3: #8d8c9b;
+  --sp-accent: #6e54ff;
+  --sp-accent-hover: #5f45f0;
+  --sp-accent-fg: #ffffff;
+  --sp-accent-text: #a99dff;
+  --sp-accent-soft: rgba(110, 84, 255, 0.14);
+  --sp-accent-border: rgba(140, 120, 255, 0.4);
+  --sp-ring: #a99dff;
+  --sp-mark: #7d66ff;
+  --sp-ok: #22c55e;
+  --sp-ok-text: #4ade80;
+  --sp-ok-soft: rgba(34, 197, 94, 0.12);
+  --sp-ok-border: rgba(34, 197, 94, 0.3);
+  --sp-info: #3b82f6;
+  --sp-info-text: #60a5fa;
+  --sp-info-soft: rgba(59, 130, 246, 0.13);
+  --sp-info-border: rgba(59, 130, 246, 0.32);
+  --sp-sleep: #9d97c9;
+  --sp-sleep-text: #b3aedb;
+  --sp-sleep-soft: rgba(157, 151, 201, 0.12);
+  --sp-sleep-border: rgba(157, 151, 201, 0.3);
+  --sp-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --sp-bg: #0e0d13;
+    --sp-surface: #15141b;
+    --sp-surface-2: #1b1a22;
+    --sp-border: #26252e;
+    --sp-border-strong: #35343f;
+    --sp-text: #edecf3;
+    --sp-text-2: #b6b5c2;
+    --sp-text-3: #8d8c9b;
+    --sp-accent: #6e54ff;
+    --sp-accent-hover: #5f45f0;
+    --sp-accent-fg: #ffffff;
+    --sp-accent-text: #a99dff;
+    --sp-accent-soft: rgba(110, 84, 255, 0.14);
+    --sp-accent-border: rgba(140, 120, 255, 0.4);
+    --sp-ring: #a99dff;
+    --sp-mark: #7d66ff;
+    --sp-ok: #22c55e;
+    --sp-ok-text: #4ade80;
+    --sp-ok-soft: rgba(34, 197, 94, 0.12);
+    --sp-ok-border: rgba(34, 197, 94, 0.3);
+    --sp-info: #3b82f6;
+    --sp-info-text: #60a5fa;
+    --sp-info-soft: rgba(59, 130, 246, 0.13);
+    --sp-info-border: rgba(59, 130, 246, 0.32);
+    --sp-sleep: #9d97c9;
+    --sp-sleep-text: #b3aedb;
+    --sp-sleep-soft: rgba(157, 151, 201, 0.12);
+    --sp-sleep-border: rgba(157, 151, 201, 0.3);
+    --sp-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+  }
+}

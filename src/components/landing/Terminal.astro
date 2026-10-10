@@ -1,0 +1,232 @@
+---
+/**
+ * A recorded terminal session, as text rather than a picture of it:
+ * readable by screen readers and search engines, selectable, sharp at any
+ * size. The page shows the final screen, then replays the session in real
+ * time once it comes into view. The static text stays in the page for
+ * screen readers while an animated copy, hidden from them, plays. A button
+ * pauses and replays it; nothing plays by itself for readers who asked for
+ * less motion.
+ */
+import type { Recording } from '../../lib/cast';
+import { Screen } from '../../lib/terminal';
+
+interface Props {
+  recording: Recording;
+  /** Where the command ran: a directory and its branch. */
+  context: string;
+  caption: string;
+}
+
+const { recording, context, caption } = Astro.props;
+
+const screen = new Screen();
+recording.events.forEach(([, data]) => screen.write(data));
+const events = JSON.stringify(recording.events).replace(/</g, '\\u003c');
+---
+
+<figure class="terminal" data-recording>
+  <div class="frame">
+    <div class="bar">
+      <p class="context">{context}</p>
+      <button type="button" class="play" hidden aria-label="Replay this terminal session">Replay</button>
+    </div>
+    <pre class="still"><code set:html={screen.html()} /></pre>
+    <pre class="live" aria-hidden="true" hidden></pre>
+  </div>
+  <figcaption>{caption}</figcaption>
+  <script is:inline type="application/json" set:html={events} />
+</figure>
+
+<script>
+  import { Screen } from '../../lib/terminal';
+
+  for (const figure of document.querySelectorAll<HTMLElement>('figure[data-recording]')) {
+    const data = figure.querySelector('script[type="application/json"]');
+    const button = figure.querySelector<HTMLButtonElement>('button.play');
+    const still = figure.querySelector<HTMLElement>('pre.still');
+    const live = figure.querySelector<HTMLElement>('pre.live');
+    if (!data || !button || !still || !live) continue;
+
+    const events = JSON.parse(data.textContent ?? '[]') as [number, string][];
+    let screen = new Screen();
+    let index = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let playing = false;
+
+    const label = (text: string, description: string) => {
+      button.textContent = text;
+      button.setAttribute('aria-label', description);
+    };
+
+    const showLive = (on: boolean) => {
+      if (on && !still.classList.contains('playing')) {
+        live.style.minHeight = `${still.offsetHeight}px`;
+      }
+      live.hidden = !on;
+      still.classList.toggle('playing', on);
+    };
+
+    const step = () => {
+      if (index >= events.length) {
+        playing = false;
+        showLive(false);
+        label('Replay', 'Replay this terminal session');
+        return;
+      }
+      screen.write(events[index][1]);
+      index += 1;
+      live.innerHTML = screen.html();
+      timer = setTimeout(step, index < events.length ? events[index][0] * 1000 : 1500);
+    };
+
+    const play = () => {
+      if (index === 0 || index >= events.length) {
+        screen = new Screen();
+        index = 0;
+      }
+      live.innerHTML = screen.html();
+      showLive(true);
+      playing = true;
+      label('Pause', 'Pause this terminal session');
+      timer = setTimeout(step, (events[index]?.[0] ?? 0) * 1000);
+    };
+
+    const pause = () => {
+      clearTimeout(timer);
+      playing = false;
+      label('Play', 'Play this terminal session');
+    };
+
+    button.hidden = false;
+    button.addEventListener('click', () => (playing ? pause() : play()));
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            observer.disconnect();
+            play();
+          }
+        },
+        { threshold: 0.6 },
+      );
+      observer.observe(figure);
+    }
+  }
+</script>
+
+<style>
+  .terminal {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 0;
+  }
+
+  .frame {
+    position: relative;
+    border: 1px solid var(--sp-term-border);
+    border-radius: 8px;
+    background: var(--sp-term-bg);
+    overflow: hidden;
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 2.25rem;
+    padding: 0.3rem 0.5rem 0.3rem 1rem;
+    border-bottom: 1px solid var(--sp-term-border);
+  }
+
+  .context {
+    color: var(--sp-term-dim);
+    font-family: var(--sp-font-mono);
+    font-size: 0.75rem;
+  }
+
+  .play {
+    flex: none;
+    min-height: 1.75rem;
+    padding: 0 0.7rem;
+    border: 1px solid var(--sp-term-border-strong);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--sp-term-text);
+    font: 600 0.75rem/1 var(--sp-font);
+    cursor: pointer;
+  }
+
+  .play:hover {
+    border-color: var(--sp-term-prompt);
+  }
+
+  pre {
+    padding: 1rem 1.25rem 1.1rem;
+    color: var(--sp-term-text);
+    font-family: var(--sp-font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  pre code {
+    font-size: inherit;
+  }
+
+  .still.playing {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  pre :global(.prompt) {
+    color: var(--sp-term-prompt);
+  }
+
+  pre :global(.d),
+  pre :global(.c-gray) {
+    color: var(--sp-term-dim);
+  }
+
+  pre :global(.c-green) {
+    color: var(--sp-term-ok);
+  }
+
+  pre :global(.c-cyan) {
+    color: var(--sp-term-url);
+  }
+
+  pre :global(.c-red) {
+    color: var(--sp-term-err);
+  }
+
+  pre :global(.c-yellow) {
+    color: var(--sp-term-warn);
+  }
+
+  pre :global(.c-blue) {
+    color: var(--sp-term-info);
+  }
+
+  pre :global(.c-magenta) {
+    color: var(--sp-term-prompt);
+  }
+
+  pre :global(.b) {
+    font-weight: 700;
+  }
+
+  figcaption {
+    color: var(--sp-text-3);
+    font-size: 0.875rem;
+  }
+</style>

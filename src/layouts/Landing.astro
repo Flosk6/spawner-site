@@ -1,0 +1,81 @@
+---
+/**
+ * The page of the home page and of the pages built like it (404, compare,
+ * legal): the theme set before paint, the meta tags of search engines and
+ * social cards, and the fonts. Controls that need JavaScript carry
+ * `data-js-only`, and are hidden when it does not run.
+ */
+import '@fontsource-variable/overpass';
+import '@fontsource-variable/overpass-mono';
+import '@fontsource/chakra-petch/latin-700.css';
+import chakraPetch from '@fontsource/chakra-petch/files/chakra-petch-latin-700-normal.woff2?url';
+import overpassMonoLatin from '@fontsource-variable/overpass-mono/files/overpass-mono-latin-wght-normal.woff2?url';
+import overpassLatin from '@fontsource-variable/overpass/files/overpass-latin-wght-normal.woff2?url';
+import '../styles/tokens.css';
+import '../styles/landing.css';
+import { OG_IMAGE_ALT, SITE_NAME } from '../lib/site';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Structured data for search engines (schema.org), printed as JSON-LD. */
+  jsonLd?: Record<string, unknown>;
+  /** Keeps the page out of search engines, and without a canonical URL (the 404 page). */
+  noindex?: boolean;
+}
+
+const { title, description, jsonLd, noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL('/og.png', Astro.site);
+---
+
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      (function () {
+        var stored = null;
+        try {
+          stored = localStorage.getItem('starlight-theme');
+        } catch (error) {
+          stored = null;
+        }
+        var theme = stored === 'light' || stored === 'dark' ? stored : window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <noscript><style is:inline>[data-js-only] { display: none !important; }</style></noscript>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <link rel="preload" href={overpassLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={overpassMonoLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={chakraPetch} as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f6f6f9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e0d13" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={OG_IMAGE_ALT} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <slot />
+  </body>
+</html>

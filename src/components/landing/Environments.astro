@@ -1,0 +1,307 @@
+---
+/**
+ * The hero's picture: branches of a project leaving main, each with its
+ * environment, with the dashboard's status pills. The list carries the
+ * meaning; the drawing of the branches is decorative. On a phone the
+ * drawing goes, and branch names and URLs wrap where a reader expects it
+ * (after a slash, a double dash or a dot) instead of being cut.
+ */
+type Status = 'ready' | 'building' | 'sleeping';
+
+const environments: { branch: string; status: Status; line: string; isUrl: boolean; meta: string }[] = [
+  { branch: 'feat/login', status: 'ready', line: 'feat-login--blog.preview.example.com', isUrl: true, meta: 'web, api, db' },
+  { branch: 'fix/checkout', status: 'building', line: 'from a worktree, 2 uncommitted files', isUrl: false, meta: 'Ben via laptop' },
+  { branch: 'feat/search-filters', status: 'ready', line: 'feat-search-filters--blog.preview.example.com', isUrl: true, meta: 'Ada via claude' },
+  { branch: 'main', status: 'sleeping', line: 'main--blog.preview.example.com', isUrl: true, meta: 'wakes up on a visit' },
+];
+
+const labels: Record<Status, string> = { ready: 'Ready', building: 'Building', sleeping: 'Sleeping' };
+
+/** Splits a branch name after its slashes, or a host after its double dashes and dots: where it may wrap. */
+const breakable = (text: string) => text.split(/(?<=\/|--|\.)/);
+
+const cards = environments.map((environment) => ({
+  ...environment,
+  branchParts: breakable(environment.branch),
+  urlParts: environment.isUrl ? breakable(environment.line) : null,
+}));
+---
+
+<figure class="environments">
+  <figcaption class="sr-only">Example: four branches of a project named blog, each with its own environment.</figcaption>
+  <div class="layout">
+    <svg class="graph" viewBox="0 0 60 324" aria-hidden="true" focusable="false">
+      <path class="trunk" d="M12 0V288"></path>
+      <path class="branch" d="M12 6C12 28 30 36 52 36"></path>
+      <path class="branch building" d="M12 90C12 112 30 120 52 120"></path>
+      <path class="branch" d="M12 174C12 196 30 204 52 204"></path>
+      <path class="branch sleeping" d="M12 288H52"></path>
+      <circle class="node ready" cx="52" cy="36" r="6"></circle>
+      <circle class="node building" cx="52" cy="120" r="6"></circle>
+      <circle class="node ready" cx="52" cy="204" r="6"></circle>
+      <circle class="node sleeping" cx="52" cy="288" r="6"></circle>
+    </svg>
+    <ul class="cards">
+      {
+        cards.map((environment) => (
+          <li class="card">
+            <span class="branch-name">{environment.branchParts.map((part, index) => [index > 0 && <wbr />, <span class="part">{part}</span>])}</span>
+            <span class:list={['status', environment.status]}>
+              <span class="dot" aria-hidden="true" />
+              {labels[environment.status]}
+            </span>
+            <span class:list={['line', { url: environment.isUrl }]}>
+              {environment.urlParts ? environment.urlParts.map((part, index) => [index > 0 && <wbr />, <span class="part">{part}</span>]) : environment.line}
+            </span>
+            <span class="meta">{environment.meta}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  <p class="capacity">
+    <span class="bar" aria-hidden="true"><span></span></span>
+    4 environments; 9 more fit on this server
+  </p>
+</figure>
+
+<style>
+  .environments {
+    min-width: 0;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 3.75rem minmax(0, 1fr);
+  }
+
+  .graph {
+    width: 3.75rem;
+    height: 20.25rem;
+  }
+
+  .trunk,
+  .branch {
+    fill: none;
+    stroke: var(--sp-mark);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+
+  .branch.building {
+    stroke-dasharray: 6 5;
+    animation: march 1s linear 4;
+  }
+
+  .branch.sleeping {
+    stroke: var(--sp-border-strong);
+  }
+
+  .node {
+    stroke-width: 2.5;
+  }
+
+  .node.ready {
+    fill: var(--sp-ok);
+    stroke: var(--sp-bg);
+  }
+
+  .node.building {
+    fill: var(--sp-bg);
+    stroke: var(--sp-info);
+    stroke-dasharray: 3 2.5;
+  }
+
+  .node.sleeping {
+    fill: var(--sp-bg);
+    stroke: var(--sp-sleep);
+  }
+
+  @keyframes march {
+    to {
+      stroke-dashoffset: -22;
+    }
+  }
+
+  .cards {
+    display: grid;
+    grid-template-rows: repeat(4, 4.5rem);
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    min-width: 0;
+  }
+
+  .card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'branch meta status'
+      'line line line';
+    align-content: center;
+    align-items: center;
+    gap: 0.35rem 0.75rem;
+    min-width: 0;
+    padding: 0 1.1rem;
+    border: 1px solid var(--sp-border);
+    border-radius: 8px;
+    background: var(--sp-surface);
+    box-shadow: var(--sp-shadow);
+  }
+
+  .branch-name,
+  .line {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .branch-name {
+    grid-area: branch;
+    color: var(--sp-text);
+    font-family: var(--sp-font-mono);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    font-variant-ligatures: none;
+  }
+
+  .status {
+    grid-area: status;
+    display: inline-flex;
+    align-items: center;
+    justify-self: end;
+    gap: 0.4rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .status.ready {
+    border-color: var(--sp-ok-border);
+    background: var(--sp-ok-soft);
+    color: var(--sp-ok-text);
+  }
+
+  .status.building {
+    border-color: var(--sp-info-border);
+    background: var(--sp-info-soft);
+    color: var(--sp-info-text);
+  }
+
+  .status.sleeping {
+    border-color: var(--sp-sleep-border);
+    background: var(--sp-sleep-soft);
+    color: var(--sp-sleep-text);
+  }
+
+  .dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .status.sleeping .dot {
+    background: transparent;
+    border: 1.5px solid currentColor;
+  }
+
+  .line {
+    grid-area: line;
+    color: var(--sp-text-2);
+    font-size: 0.8125rem;
+  }
+
+  .line.url {
+    color: var(--sp-accent-text);
+    font-family: var(--sp-font-mono);
+    font-variant-ligatures: none;
+  }
+
+  .meta {
+    grid-area: meta;
+    justify-self: end;
+    color: var(--sp-text-3);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
+
+  .capacity {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    padding-left: 3.75rem;
+    color: var(--sp-text-2);
+    font-size: 0.875rem;
+  }
+
+  .bar {
+    flex: none;
+    width: 9rem;
+    height: 0.375rem;
+    border-radius: 1rem;
+    background: var(--sp-border);
+    overflow: hidden;
+  }
+
+  .bar span {
+    display: block;
+    width: 31%;
+    height: 100%;
+    background: var(--sp-mark);
+  }
+
+  @media (max-width: 34rem) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .graph {
+      display: none;
+    }
+
+    .cards {
+      grid-template-rows: none;
+      gap: 0.6rem;
+    }
+
+    .card {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        'branch status'
+        'line line'
+        'meta meta';
+      gap: 0.3rem 0.75rem;
+      padding: 0.8rem 1rem;
+    }
+
+    .branch-name,
+    .line {
+      overflow: visible;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .part {
+      white-space: nowrap;
+    }
+
+    .meta {
+      justify-self: start;
+      white-space: normal;
+    }
+
+    .capacity {
+      padding-left: 0;
+    }
+
+    .bar {
+      width: 5rem;
+    }
+  }
+</style>

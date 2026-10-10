@@ -1,0 +1,43 @@
+# Response headers of the site on Cloudflare (Workers static assets).
+#
+# Cloudflare sends every file with "Cache-Control: public, max-age=0,
+# must-revalidate" and an ETag: browsers check pages and unhashed files
+# (HTML, pagefind.js, pagefind-entry.json, wasm.*.pagefind, og.png, llms.txt)
+# each time, and get a 304 when they did not change. Only files whose name
+# carries a hash of their content are cached for a year, below.
+#
+# No Content-Security-Policy yet: the theme script and the structured data
+# are inline and Pagefind compiles WebAssembly, so a policy needs their hashes
+# (or 'unsafe-inline') and 'wasm-unsafe-eval', and a check that search still
+# works. Neither X-Frame-Options nor frame-ancestors: the dashboard of every
+# Spawner server, on whatever domain it runs, opens these docs in an iframe,
+# and the site has no account, form or action a framing page could misuse.
+# HSTS without includeSubDomains or preload until every subdomain of
+# spawner.run is served over HTTPS.
+
+/*
+  Strict-Transport-Security: max-age=31536000
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/pagefind/fragment/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/pagefind/index/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/pagefind/filter/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/pagefind/*.pf_meta
+  Cache-Control: public, max-age=31536000, immutable
+
+# The Markdown copy of a page tells search engines that the page is the original.
+/docs/:page.md
+  Link: <https://spawner.run/docs/:page/>; rel="canonical"
+
+/changelog.md
+  Link: <https://spawner.run/changelog/>; rel="canonical"

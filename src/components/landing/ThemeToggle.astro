@@ -1,0 +1,86 @@
+---
+/**
+ * Switches the page between its light and dark themes. The choice is kept
+ * under Starlight's key, so the docs open in the same theme; without one,
+ * the page follows the system, as it does without JavaScript, when the
+ * button is hidden.
+ */
+---
+
+<button type="button" class="theme-toggle" data-theme-toggle data-js-only aria-label="Switch to the dark theme">
+  <svg class="moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
+  </svg>
+  <svg class="sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+    <path
+      d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"></path>
+  </svg>
+</button>
+
+<script>
+  const KEY = 'starlight-theme';
+
+  /** Keeps the choice for the next pages; without storage, it lasts for this one. */
+  const remember = (theme: string) => {
+    try {
+      localStorage.setItem(KEY, theme);
+    } catch {
+      return;
+    }
+  };
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')) {
+    const describe = () => {
+      const dark = document.documentElement.dataset.theme === 'dark';
+      button.setAttribute('aria-label', dark ? 'Switch to the light theme' : 'Switch to the dark theme');
+    };
+    describe();
+    button.addEventListener('click', () => {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      remember(next);
+      describe();
+    });
+  }
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 1px solid var(--sp-border);
+    border-radius: 6px;
+    background: var(--sp-surface);
+    color: var(--sp-text-2);
+    cursor: pointer;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--sp-border-strong);
+    color: var(--sp-text);
+  }
+
+  svg {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
+  .sun {
+    display: none;
+  }
+
+  :global(:root[data-theme='dark']) .sun {
+    display: block;
+  }
+
+  :global(:root[data-theme='dark']) .moon {
+    display: none;
+  }
+</style>

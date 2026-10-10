@@ -1,0 +1,9 @@
+# Security contact of Spawner and of this site (RFC 9116).
+# Report a vulnerability privately through GitHub, never in a public issue.
+# Expires is renewed by hand: the deploy workflow fails 30 days before it.
+
+Contact: https://github.com/Flosk6/Spawner/security/advisories/new
+Expires: 2027-10-09T00:00:00Z
+Preferred-Languages: en, fr
+Canonical: https://spawner.run/.well-known/security.txt
+Policy: https://github.com/Flosk6/Spawner/blob/master/SECURITY.md

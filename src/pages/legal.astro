@@ -1,0 +1,184 @@
+---
+/**
+ * The legal notice French law asks of every website (mentions légales) and
+ * what the site does with a visit: the publisher, the host, what the browser
+ * keeps, what the host processes, the licenses and the credits. Each
+ * statement must stay true of the site's code and of its Cloudflare zone:
+ * no cookie, no analytics, nothing loaded from another site.
+ */
+import SiteFooter from '../components/landing/SiteFooter.astro';
+import SiteHeader from '../components/landing/SiteHeader.astro';
+import Landing from '../layouts/Landing.astro';
+import { describedVersion, docsSource } from '../lib/docs-source';
+import { LEGAL_UPDATED, LICENSE_URL, REPO_URL } from '../lib/site';
+---
+
+<Landing
+  title="Legal notice and privacy | Spawner"
+  description="Who publishes and hosts spawner.run, and what happens to your visit: no cookies, no analytics, nothing loaded from another site."
+>
+  <SiteHeader />
+  <main id="main" tabindex="-1">
+    <section class="section" aria-labelledby="legal-title">
+      <div class="wrap text">
+        <div class="part">
+          <h1 class="section-title" id="legal-title">Legal notice and privacy</h1>
+          <p class="lede">
+            Who publishes spawner.run, who hosts it, and what happens when you visit it: no cookies, no analytics, nothing loaded from another site.
+          </p>
+          <p class="updated">Updated on <time datetime={LEGAL_UPDATED.iso}>{LEGAL_UPDATED.text}</time>.</p>
+        </div>
+
+        <section class="part" aria-labelledby="mentions-legales">
+          <h2 id="mentions-legales" lang="fr">Mentions légales</h2>
+          <p>What French law asks every website to state: who publishes it, how to reach them, and who hosts it.</p>
+          <dl>
+            <div>
+              <dt>Publisher</dt>
+              <dd>
+                The maintainer of Spawner, <a href="https://github.com/Flosk6">Flosk6</a> on GitHub: a private individual who publishes this site on a
+                non-professional basis. As article 1-1, II of the French law of 21 June 2004 on confidence in the digital economy
+                (<span lang="fr">loi pour la confiance dans l’économie numérique</span>, LCEN) allows, the publisher’s name and address are not shown
+                here: the publisher gave them to the host, as that article requires.
+              </dd>
+            </div>
+            <div>
+              <dt>Contact</dt>
+              <dd>
+                Through GitHub: <a href={`${REPO_URL}/issues`}>an issue</a> for a question about this site or Spawner, or
+                <a href={`${REPO_URL}/security/advisories/new`}>a private report</a> for a security vulnerability, as the
+                <a href={`${REPO_URL}/blob/master/SECURITY.md`}>security policy</a> describes.
+              </dd>
+            </div>
+            <div>
+              <dt>Host</dt>
+              <dd>
+                Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, United States. Phone: +1 (650) 319-8930.
+                <a href="https://www.cloudflare.com/">cloudflare.com</a>
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="part" aria-labelledby="privacy">
+          <h2 id="privacy">Privacy</h2>
+          <p>
+            This site sets no cookies and runs no analytics or tracking script. It loads nothing from another site: its fonts, images and search index
+            are files of spawner.run. Links to GitHub, npm and other sites take you there only when you follow them.
+          </p>
+
+          <h3 id="what-your-browser-keeps">What your browser keeps</h3>
+          <p>
+            Two settings, which stay on your device and are sent to no one: the theme you pick, light or dark, in the browser’s local storage (under
+            the key <code>starlight-theme</code>); and on documentation pages, which groups of the sidebar are open and where it is scrolled, in its
+            session storage, which the browser empties when you close the tab. Clearing this site’s data in your browser removes both.
+          </p>
+
+          <h3 id="what-the-host-processes">What the host processes</h3>
+          <p>
+            To deliver each page and protect the site from attacks, Cloudflare handles the technical data of every request: the IP address it comes
+            from, the address asked for, the browser’s user agent and the time. It does so on the publisher’s behalf, and keeps this data as
+            <a href="https://www.cloudflare.com/privacypolicy/">its privacy policy</a> describes; for data that leaves the European Union, Cloudflare
+            is certified under the EU-U.S. Data Privacy Framework. The publisher keeps no logs of its own and does not combine this data with any
+            other. This processing rests on the publisher’s legitimate interest in serving the site and keeping it secure (article 6(1)(f) of the
+            GDPR).
+          </p>
+
+          <h3 id="your-rights">Your rights</h3>
+          <p>
+            Under the GDPR, you can ask for access to the data about you or for its erasure, and object to its processing, through the contact above;
+            beyond what Cloudflare processes, the publisher holds none. You can also lodge a complaint with the CNIL, the French data protection
+            authority (<a href="https://www.cnil.fr/">cnil.fr</a>).
+          </p>
+        </section>
+
+        <section class="part" aria-labelledby="licenses">
+          <h2 id="licenses">Licenses and credits</h2>
+          <p>
+            Spawner is free and open source, under the <a href={LICENSE_URL}>Apache License 2.0</a>. The documentation and the changelog of this site
+            come from its repository and share its license, and the code of the site itself is under the same license, in
+            <a href="https://github.com/Flosk6/spawner-site">Flosk6/spawner-site</a>.
+          </p>
+          <p>
+            The site is built with <a href="https://astro.build/">Astro</a>, <a href="https://starlight.astro.build/">Starlight</a> and
+            <a href="https://pagefind.app/">Pagefind</a>, under the MIT license. Its typefaces, served from the site itself, are Overpass and Overpass
+            Mono, by the Overpass Project Authors, and Chakra Petch, by the Chakra Petch Project Authors, under the
+            <a href="https://openfontlicense.org/">SIL Open Font License 1.1</a>.
+          </p>
+        </section>
+      </div>
+    </section>
+  </main>
+  <SiteFooter described={describedVersion(docsSource())} />
+</Landing>
+
+<style>
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
+  }
+
+  .part {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 46rem;
+  }
+
+  .lede {
+    color: var(--sp-text-2);
+    font-size: 1.1875rem;
+  }
+
+  .updated {
+    color: var(--sp-text-3);
+    font-size: 0.9375rem;
+  }
+
+  h2 {
+    font-size: 1.625rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  h3 {
+    margin-top: 0.75rem;
+    font-size: 1.1875rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  p,
+  dd {
+    color: var(--sp-text-2);
+  }
+
+  dl {
+    margin: 0.5rem 0 0;
+    border-bottom: 1px solid var(--sp-border);
+  }
+
+  dl > div {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    gap: 0.25rem 2rem;
+    padding-block: 1.25rem;
+    border-top: 1px solid var(--sp-border);
+  }
+
+  dt {
+    color: var(--sp-text);
+    font-weight: 700;
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  @media (max-width: 40rem) {
+    dl > div {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

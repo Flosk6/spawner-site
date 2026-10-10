@@ -1,0 +1,100 @@
+---
+/**
+ * The home page: what Spawner is, a real session, how it works, the
+ * dashboard, what sets it apart, the questions people ask, and the way to
+ * install it. Its structured data describes the same software, from the
+ * same text.
+ */
+import Dashboard from '../components/landing/Dashboard.astro';
+import Faq from '../components/landing/Faq.astro';
+import Features from '../components/landing/Features.astro';
+import Hero from '../components/landing/Hero.astro';
+import HowItWorks from '../components/landing/HowItWorks.astro';
+import Install from '../components/landing/Install.astro';
+import NewEnvironment from '../components/landing/NewEnvironment.astro';
+import SiteFooter from '../components/landing/SiteFooter.astro';
+import SiteHeader from '../components/landing/SiteHeader.astro';
+import { faq, faqJsonLd } from '../data/faq';
+import { dashboard, fullSize } from '../data/screenshots';
+import Landing from '../layouts/Landing.astro';
+import { describedVersion, docsSource, isRelease } from '../lib/docs-source';
+import { AUTHOR, DESCRIPTION, NPM_URL, REPO_URL, SITE_NAME } from '../lib/site';
+
+const source = docsSource();
+const home = new URL('/', Astro.site).href;
+const page = (path: string) => new URL(path, Astro.site).href;
+const author = { '@id': `${home}#author` };
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${home}#website`,
+      name: SITE_NAME,
+      url: home,
+      description: DESCRIPTION,
+      inLanguage: 'en',
+      publisher: author,
+    },
+    {
+      '@type': 'Person',
+      '@id': `${home}#author`,
+      name: AUTHOR.name,
+      url: AUTHOR.url,
+    },
+    {
+      '@type': 'SoftwareApplication',
+      '@id': `${home}#software`,
+      name: SITE_NAME,
+      description: DESCRIPTION,
+      url: home,
+      applicationCategory: 'DeveloperApplication',
+      applicationSubCategory: 'Preview environments',
+      operatingSystem: 'Linux',
+      ...(isRelease(source) ? { softwareVersion: source.version } : {}),
+      softwareRequirements: 'Ubuntu 22.04 or 24.04, or Debian 12, on amd64 or arm64; Docker, which the installer sets up',
+      memoryRequirements: '4 GiB',
+      storageRequirements: '20 GiB',
+      license: 'https://www.apache.org/licenses/LICENSE-2.0',
+      isAccessibleForFree: true,
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      downloadUrl: `${REPO_URL}/releases/latest`,
+      installUrl: page('/docs/install/'),
+      releaseNotes: page('/changelog/'),
+      softwareHelp: { '@type': 'CreativeWork', url: page('/docs/') },
+      image: page('/og.png'),
+      screenshot: page(await fullSize(dashboard.light)),
+      keywords: 'preview environments, ephemeral environments, review apps, self-hosted, Docker Compose, coding agents, MCP',
+      author,
+      publisher: author,
+      sameAs: [REPO_URL, NPM_URL],
+    },
+    {
+      '@type': 'SoftwareSourceCode',
+      '@id': `${home}#source`,
+      name: `${SITE_NAME} source code`,
+      codeRepository: REPO_URL,
+      programmingLanguage: 'TypeScript',
+      license: 'https://www.apache.org/licenses/LICENSE-2.0',
+      targetProduct: { '@id': `${home}#software` },
+      author,
+    },
+    faqJsonLd(faq, `${home}#faq`),
+  ],
+};
+---
+
+<Landing title="Spawner: self-hosted preview environments for every branch" description={DESCRIPTION} jsonLd={jsonLd}>
+  <SiteHeader />
+  <main id="main" tabindex="-1">
+    <Hero />
+    <NewEnvironment />
+    <HowItWorks />
+    <Dashboard />
+    <Features />
+    <Faq />
+    <Install />
+  </main>
+  <SiteFooter described={describedVersion(source)} />
+</Landing>

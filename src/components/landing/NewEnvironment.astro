@@ -1,0 +1,41 @@
+---
+/**
+ * The page's one terminal: a real `spawner up`, replayed in real time, with
+ * how it was recorded, so that the time it shows can be checked.
+ */
+import { newEnvironment } from '../../data/recordings';
+import Terminal from './Terminal.astro';
+---
+
+<section class="section section-alt" aria-labelledby="new-environment-title">
+  <div class="wrap layout">
+    <div class="text">
+      <h2 class="section-title" id="new-environment-title">A new environment in seconds</h2>
+      <p class="section-lede">
+        From a branch, or straight from your worktree with its uncommitted changes. One command, and the branch has its own URL and database:
+        about 5&nbsp;s once the project’s images are built.
+      </p>
+    </div>
+    <Terminal
+      recording={newEnvironment}
+      context="~/code/shop on feat/login, one file changed"
+      caption={`Real time, with Spawner on the same laptop. A new branch reuses the images its project already built (12\u00a0s the first time), and the database healthcheck polls every 250\u00a0ms while it starts.`}
+    />
+  </div>
+</section>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    align-items: center;
+    gap: 3rem;
+  }
+
+  @media (max-width: 56rem) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2rem;
+    }
+  }
+</style>

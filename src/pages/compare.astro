@@ -1,0 +1,491 @@
+---
+/**
+ * Spawner next to the other ways to get preview environments. The first
+ * screen says where Spawner fits and when another tool fits better; one
+ * table places each family of tools on the questions that decide; the
+ * details of each tool and the sources stay folded below. Every statement
+ * about another tool comes from its own documentation (src/data/compare.ts
+ * lists them); every statement about Spawner holds for the release the page
+ * names. The list of what Spawner does not do follows the one of
+ * docs/concepts.md in Spawner.
+ */
+import CompareTable from '../components/compare/CompareTable.astro';
+import SiteFooter from '../components/landing/SiteFooter.astro';
+import SiteHeader from '../components/landing/SiteHeader.astro';
+import {
+  CHECKED,
+  compareJsonLd,
+  DESCRIPTION,
+  ELSEWHERE,
+  FAMILIES,
+  FITS,
+  GROUPS,
+  HEADING,
+  NOTES,
+  SOURCES,
+  SPAWNER_VERSION,
+  SUMMARY_CRITERIA,
+  TITLE,
+} from '../data/compare';
+import Landing from '../layouts/Landing.astro';
+import { describedVersion, docsSource } from '../lib/docs-source';
+import { REPO_URL } from '../lib/site';
+
+const home = new URL('/', Astro.site).href;
+const url = new URL(Astro.url.pathname, Astro.site).href;
+const jsonLd = compareJsonLd({ url, home });
+---
+
+<Landing title={TITLE} description={DESCRIPTION} jsonLd={jsonLd}>
+  <SiteHeader />
+  <main id="main" tabindex="-1">
+    <div class="wrap intro">
+      <h1>{HEADING}</h1>
+      <p class="lede">
+        Spawner does one job: a preview of every branch, on one server of yours, for a team and its coding agents. Here is where it sits next to
+        the other ways to get preview environments, also called review apps or ephemeral environments.
+      </p>
+    </div>
+
+    <section class="part" aria-labelledby="fit">
+      <div class="wrap">
+        <h2 id="fit">Where Spawner fits</h2>
+        <div class="fit">
+          <div>
+            <h3>Choose Spawner when</h3>
+            <ul>{FITS.map((item) => <li>{item}</li>)}</ul>
+          </div>
+          <div>
+            <h3>Choose something else for</h3>
+            <ul>
+              {
+                ELSEWHERE.map((item) => (
+                  <li>
+                    {item.need}: <a href={item.href}>{item.tools}</a>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part part-alt" aria-labelledby="side-by-side">
+      <div class="wrap">
+        <h2 id="side-by-side">Side by side</h2>
+        <p class="sub">One line per family of tools. Each tool’s own answers, and where they come from, are in the details below.</p>
+        <table class="summary">
+          <thead>
+            <tr>
+              <th scope="col"><span class="sr-only">Tools</span></th>
+              {SUMMARY_CRITERIA.map((criterion) => <th scope="col">{criterion.label}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {
+              FAMILIES.map((family) => (
+                <tr class:list={{ own: !family.tools }}>
+                  <th scope="row">
+                    {family.name}
+                    {family.tools && <span class="tools">{family.tools}</span>}
+                  </th>
+                  {SUMMARY_CRITERIA.map((criterion) => (
+                    <td>
+                      <span class="label" aria-hidden="true">
+                        {criterion.label}
+                      </span>
+                      <span>{family.cells[criterion.id]}</span>
+                    </td>
+                  ))}
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="part" aria-labelledby="limits">
+      <div class="wrap prose">
+        <h2 id="limits">What Spawner does not do</h2>
+        <ul class="limits">
+          <li>
+            <strong>Production, scaling or several servers.</strong> One installation runs on one Linux server, dedicated to previews, with Docker
+            Compose.
+          </li>
+          <li>
+            <strong>Environments for pull requests on its own.</strong> Nothing watches the git host yet: a CI job calls <code>spawner up</code> and
+            <code>spawner down</code> (<a href="/docs/ci/">previews for pull requests</a>).
+          </li>
+          <li>
+            <strong>Private image registries.</strong> Images come from public registries or are built from the sources. Repositories live on any
+            git host, over SSH with a deploy key, or over HTTPS when they are public.
+          </li>
+          <li>
+            <strong>Single sign-on beyond GitHub login, or permissions per project.</strong> No OIDC or SAML; every member sees every project.
+          </li>
+          <li>
+            <strong>More isolation than containers give.</strong> Environments share the server’s kernel, and their outbound traffic is filtered only for the cloud’s metadata and the server’s own services
+            (<a href="/docs/security/#what-spawner-does-not-do-yet">security</a>).
+          </li>
+        </ul>
+        <p>The documentation keeps this list up to date, in <a href="/docs/concepts/#what-spawner-does-not-do">concepts</a>.</p>
+      </div>
+    </section>
+
+    <section class="part part-alt" aria-labelledby="details">
+      <div class="wrap">
+        <h2 id="details">Tool by tool</h2>
+        <p class="sub">
+          Each family next to Spawner on eleven questions, from each tool’s documentation. “Not documented” means its documentation does not say.
+          Uffizzi, which made previews from Compose files, has had no commit since August 2024.
+        </p>
+        <div class="folds">
+          {
+            GROUPS.map((group) => (
+              <details id={group.id}>
+                <summary id={`${group.id}-title`}>{group.title}</summary>
+                <p class="note">
+                  {group.summary} {NOTES[group.id]}
+                </p>
+                <CompareTable group={group} />
+              </details>
+            ))
+          }
+          <details id="sources">
+            <summary>Sources</summary>
+            <ul class="sources">
+              {
+                SOURCES.map((entry) => (
+                  <li>
+                    <strong>{entry.tool}</strong>:{' '}
+                    {entry.sources.map((source, index) => (
+                      <>
+                        <a href={source.url}>{source.label}</a>
+                        {index < entry.sources.length - 1 ? ', ' : ''}
+                      </>
+                    ))}
+                  </li>
+                ))
+              }
+            </ul>
+          </details>
+        </div>
+        <p class="checked">
+          Checked on <time datetime={CHECKED.iso}>{CHECKED.text}</time>, against Spawner {SPAWNER_VERSION} and each tool’s documentation. A line out
+          of date? <a href={`${REPO_URL}/issues`}>Open an issue</a>.
+        </p>
+      </div>
+    </section>
+  </main>
+  <SiteFooter described={describedVersion(docsSource())} />
+</Landing>
+
+<style>
+  .intro {
+    padding-block: 4.5rem 3.5rem;
+  }
+
+  h1 {
+    max-width: 52rem;
+    font-size: clamp(2.125rem, 4.2vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  .lede {
+    max-width: 46rem;
+    margin-top: 1.25rem;
+    color: var(--sp-text-2);
+    font-size: 1.1875rem;
+  }
+
+  .part {
+    padding-block: 4rem;
+    border-top: 1px solid var(--sp-border);
+  }
+
+  .part-alt {
+    background: var(--sp-surface);
+  }
+
+  h2 {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .sub {
+    max-width: 46rem;
+    margin-top: 0.75rem;
+    color: var(--sp-text-2);
+  }
+
+  .fit {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 4rem;
+    margin-top: 2rem;
+  }
+
+  .fit h3 {
+    font-size: 1.1875rem;
+    font-weight: 700;
+  }
+
+  .fit ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1rem 0 0;
+    padding-left: 1.25rem;
+    color: var(--sp-text-2);
+  }
+
+  .fit a {
+    font-weight: 700;
+  }
+
+  .summary {
+    width: 100%;
+    margin-top: 2rem;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+  }
+
+  .summary th,
+  .summary td {
+    padding: 0.8rem 0.9rem;
+    border-bottom: 1px solid var(--sp-border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .summary thead th {
+    border-bottom: 2px solid var(--sp-border-strong);
+    color: var(--sp-text);
+    font-weight: 700;
+  }
+
+  .summary thead th:first-child {
+    width: 15rem;
+  }
+
+  .summary tbody th {
+    color: var(--sp-text);
+    font-weight: 700;
+  }
+
+  .summary td {
+    color: var(--sp-text-2);
+  }
+
+  .tools {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--sp-text-3);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .own th,
+  .own td {
+    background: var(--sp-accent-soft);
+    color: var(--sp-text);
+  }
+
+  .own th {
+    box-shadow: inset 3px 0 0 var(--sp-mark);
+  }
+
+  .label {
+    display: none;
+  }
+
+  .prose {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .prose > * {
+    max-width: 46rem;
+  }
+
+  .limits {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0.5rem 0 0;
+    padding-left: 1.25rem;
+    color: var(--sp-text-2);
+  }
+
+  .limits strong {
+    color: var(--sp-text);
+  }
+
+  .prose > p {
+    color: var(--sp-text-2);
+  }
+
+  .folds {
+    max-width: 72.5rem;
+    margin-top: 2rem;
+    border-bottom: 1px solid var(--sp-border);
+  }
+
+  details {
+    border-top: 1px solid var(--sp-border);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 3.5rem;
+    padding-block: 0.9rem;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.4;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::after {
+    content: '';
+    flex: none;
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-right: 0.3rem;
+    border-right: 2px solid var(--sp-text-2);
+    border-bottom: 2px solid var(--sp-text-2);
+    transform: translateY(-0.15rem) rotate(45deg);
+    transition: transform 0.15s ease;
+  }
+
+  details[open] summary::after {
+    transform: translateY(0.15rem) rotate(-135deg);
+  }
+
+  summary:hover {
+    color: var(--sp-accent-text);
+  }
+
+  details[open] {
+    padding-bottom: 2rem;
+  }
+
+  .note {
+    max-width: 46rem;
+    color: var(--sp-text-2);
+    font-size: 0.9375rem;
+  }
+
+  .sources {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 0;
+    padding-left: 1.25rem;
+    color: var(--sp-text-2);
+    font-size: 0.9375rem;
+  }
+
+  .sources strong {
+    color: var(--sp-text);
+  }
+
+  .checked {
+    margin-top: 1.5rem;
+    color: var(--sp-text-3);
+    font-size: 0.9375rem;
+  }
+
+  @media (max-width: 60rem) {
+    .fit {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .summary,
+    .summary thead,
+    .summary tbody,
+    .summary tr,
+    .summary th,
+    .summary td {
+      display: block;
+    }
+
+    .summary thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    }
+
+    .summary tr {
+      padding: 1rem 0.9rem;
+      border-top: 1px solid var(--sp-border);
+    }
+
+    .summary tr:last-child {
+      border-bottom: 1px solid var(--sp-border);
+    }
+
+    .summary tbody th {
+      padding: 0 0 0.5rem;
+      border: 0;
+      font-size: 1rem;
+    }
+
+    .summary td {
+      display: grid;
+      grid-template-columns: 11rem minmax(0, 1fr);
+      gap: 1rem;
+      padding: 0.3rem 0;
+      border: 0;
+    }
+
+    .own {
+      background: var(--sp-accent-soft);
+      box-shadow: inset 3px 0 0 var(--sp-mark);
+    }
+
+    .own th {
+      box-shadow: none;
+    }
+
+    .label {
+      display: block;
+      color: var(--sp-text-3);
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .intro {
+      padding-block: 3rem 2.5rem;
+    }
+
+    .part {
+      padding-block: 3rem;
+    }
+
+    .summary td {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.1rem;
+    }
+  }
+</style>

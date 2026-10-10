@@ -1,0 +1,162 @@
+---
+/**
+ * The footer of the home page and of the pages built like it: the links an
+ * open source project owes its readers (docs, source, license, security,
+ * legal notice), what version the pages describe, and the copyright of the
+ * NOTICE file.
+ */
+import { COPYRIGHT, LICENSE_URL, NPM_URL, REPO_URL } from '../../lib/site';
+import Wordmark from '../Wordmark.astro';
+
+interface Props {
+  /** What the docs describe: "Spawner 2.1.0", or a branch ahead of a release. */
+  described: string;
+}
+
+const { described } = Astro.props;
+
+const groups = [
+  {
+    title: 'Documentation',
+    links: [
+      { label: 'Docs', href: '/docs/' },
+      { label: 'Quickstart', href: '/docs/quickstart/' },
+      { label: 'Coding agents', href: '/docs/agents/' },
+      { label: 'Security', href: '/docs/security/' },
+      { label: 'Changelog', href: '/changelog/' },
+    ],
+  },
+  {
+    title: 'Project',
+    links: [
+      { label: 'GitHub', href: REPO_URL },
+      { label: 'Releases', href: `${REPO_URL}/releases` },
+      { label: 'npm', href: NPM_URL },
+      { label: 'Ask a question', href: `${REPO_URL}/issues/new/choose` },
+    ],
+  },
+  {
+    title: 'About',
+    links: [
+      { label: 'Compare', href: '/compare/' },
+      { label: 'FAQ', href: '/#faq' },
+      { label: 'License (Apache-2.0)', href: LICENSE_URL },
+      { label: 'Legal notice', href: '/legal/' },
+    ],
+  },
+];
+---
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <a class="home" href="/"><Wordmark /></a>
+        <p>Open source, self-hosted preview environments for teams and their coding agents.</p>
+      </div>
+      <nav class="links" aria-label="Footer">
+        {
+          groups.map((group) => (
+            <div class="group">
+              <h2>{group.title}</h2>
+              <ul>
+                {group.links.map((link) => (
+                  <li>
+                    <a href={link.href}>{link.label}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </nav>
+    </div>
+    <p class="bottom">These pages describe {described}. <span class="nowrap">{COPYRIGHT}.</span></p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--sp-border);
+    background: var(--sp-surface);
+    color: var(--sp-text-3);
+    font-size: 0.9375rem;
+  }
+
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2rem 3rem;
+    padding-block: 3rem 2rem;
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 20rem;
+  }
+
+  .brand p {
+    color: var(--sp-text-2);
+  }
+
+  .home {
+    align-self: flex-start;
+    color: var(--sp-text);
+    font-size: 1.1875rem;
+    text-decoration: none;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem 4rem;
+  }
+
+  h2 {
+    margin-bottom: 0.5rem;
+    color: var(--sp-text);
+    font-size: 0.9375rem;
+    font-weight: 700;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  ul a {
+    display: inline-block;
+    padding-block: 0.3rem;
+    color: var(--sp-text-2);
+    text-decoration: none;
+  }
+
+  ul a:hover {
+    color: var(--sp-text);
+    text-decoration: underline;
+  }
+
+  .bottom {
+    padding-block: 1.25rem 2rem;
+    border-top: 1px solid var(--sp-border);
+    color: var(--sp-text-3);
+    font-size: 0.875rem;
+  }
+
+  .nowrap {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 40rem) {
+    .links {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2rem 1.5rem;
+      width: 100%;
+    }
+  }
+</style>

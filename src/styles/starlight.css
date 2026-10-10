@@ -1,0 +1,61 @@
+/* Starlight in the dashboard's colors: its dark theme on :root, its light one under [data-theme='light']. */
+:root {
+  --sl-font: var(--sp-font);
+  --sl-font-mono: var(--sp-font-mono);
+
+  --sl-color-accent-low: #1b1734;
+  --sl-color-accent: #6e54ff;
+  --sl-color-accent-high: #a99dff;
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: #edecf3;
+  --sl-color-gray-2: #b6b5c2;
+  --sl-color-gray-3: #8d8c9b;
+  --sl-color-gray-4: #5d5c69;
+  --sl-color-gray-5: #35343f;
+  --sl-color-gray-6: #1b1a22;
+  --sl-color-black: #0e0d13;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #f1effa;
+  --sl-color-accent: #574b89;
+  --sl-color-accent-high: #3d3463;
+  --sl-color-white: #17161d;
+  --sl-color-gray-1: #23222b;
+  --sl-color-gray-2: #4b4a55;
+  --sl-color-gray-3: #6b6a76;
+  --sl-color-gray-4: #a1a1aa;
+  --sl-color-gray-5: #d4d4dc;
+  --sl-color-gray-6: #f3f3f7;
+  --sl-color-gray-7: #f6f6f9;
+  --sl-color-black: #ffffff;
+}
+
+/*
+ * Code in a table breaks where it must rather than make the table wider than
+ * the page: a table that scrolls sideways hides columns, and its scrolling
+ * takes a keyboard focus it does not have.
+ */
+.sl-markdown-content :is(td, th) code {
+  overflow-wrap: anywhere;
+}
+
+/* On the narrowest screens, any long word of a table may break. */
+@media (max-width: 22.5rem) {
+  .sl-markdown-content :is(td, th) {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* On a wide screen, a command, a flag or a variable that names a row of a table stays on one line, never cut at a hyphen (wordCells in src/lib/markdown.ts). */
+@media (min-width: 64rem) {
+  .sl-markdown-content td > code.word {
+    white-space: nowrap;
+  }
+}
+
+/* Overpass Mono joins "fi" into one glyph, which makes commands and file names look misspelled. */
+:is(code, pre, kbd, samp),
+.expressive-code :is(pre, code, span) {
+  font-variant-ligatures: none;
+}

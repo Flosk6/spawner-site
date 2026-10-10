@@ -1,0 +1,98 @@
+name: Deploy
+
+# Builds the site from the latest release of Spawner and deploys it to
+# Cloudflare (Workers static assets, see wrangler.jsonc) at
+# https://spawner.run: on every push to master, by hand, every day, so that
+# a new release of Spawner reaches the site within a day, and at once when
+# Spawner's release workflow sends a repository_dispatch of type
+# spawner-release.
+#
+# The docs come from another branch or tag of Spawner when the repository
+# variable SPAWNER_DOCS_REF names one, or the docs_ref of a run by hand: for
+# docs merged before their release, until it is out. Empty again, the site
+# follows the latest release.
+#
+# Secrets: CLOUDFLARE_API_TOKEN, a token made from the "Edit Cloudflare
+# Workers" template and limited to the account and the spawner.run zone, and
+# CLOUDFLARE_ACCOUNT_ID. Actions are pinned by commit (Dependabot bumps them);
+# Wrangler by version, bumped by hand along with the preview:cloudflare
+# script of package.json. Nothing here reads a cache another workflow could
+# have written.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      docs_ref:
+        description: Branch or tag of Spawner to take the docs from (empty for the latest release, or SPAWNER_DOCS_REF)
+        required: false
+        default: ""
+  schedule:
+    - cron: "17 5 * * *"
+  repository_dispatch:
+    types: [spawner-release]
+
+# One deploy at a time: a deploy that started finishes, and the latest run
+# waiting behind it follows.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build and deploy
+    # Run by hand on another branch, the workflow would publish that branch.
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: https://spawner.run/
+    env:
+      SITE_URL: https://spawner.run
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - name: Download the documentation
+        run: pnpm docs:fetch
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SPAWNER_DOCS_REF: ${{ inputs.docs_ref || vars.SPAWNER_DOCS_REF }}
+      - run: pnpm exec astro build
+      - name: Internal links
+        run: pnpm links
+      - run: pnpm check
+      - name: Public origin and Cloudflare files
+        run: |
+          grep -qx 'Sitemap: https://spawner.run/sitemap-index.xml' dist/robots.txt
+          if grep -rl 'localhost:4321' dist; then
+            echo "These files point to localhost instead of https://spawner.run" >&2
+            exit 1
+          fi
+          test -f dist/_headers && test -f dist/_redirects && test -f dist/.well-known/security.txt
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.139.0"
+          command: deploy
+      # After the deploy, so that it never holds one back: a failed run is the reminder.
+      - name: security.txt valid for 30 more days
+        run: |
+          expires=$(sed -n 's/^Expires: //p' public/.well-known/security.txt)
+          if [ "$(date -u -d "$expires" +%s)" -lt "$(date -u -d '+30 days' +%s)" ]; then
+            echo "public/.well-known/security.txt expires on $expires: set Expires about a year ahead" >&2
+            exit 1
+          fi

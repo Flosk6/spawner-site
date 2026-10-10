@@ -1,0 +1,144 @@
+---
+/**
+ * The whole way from a fresh server to a first environment, in its real
+ * order, the step in the dashboard included: `spawner up` stops on a
+ * project an admin has not added yet.
+ */
+import { docsSource, isRelease } from '../../lib/docs-source';
+import { INSTALL_COMMAND } from '../../lib/site';
+import CopyCommand from './CopyCommand.astro';
+
+const source = docsSource();
+---
+
+<section class="section" id="install" aria-labelledby="install-title">
+  <div class="wrap">
+    <h2 class="section-title" id="install-title">Install it on your server</h2>
+    <p class="section-lede">
+      Four steps from a fresh server to a first environment. The server: Ubuntu 22.04 or 24.04, or Debian 12, amd64 or arm64, 4&nbsp;GiB of memory
+      at least (8&nbsp;GiB or more advised), ports 80 and 443.
+    </p>
+    <ol class="steps">
+      <li>
+        <h3>Set up the server</h3>
+        <p>
+          On a Linux server dedicated to previews, with a DNS record such as <code>*.preview.example.com</code> pointing to it. The installer asks
+          for the domain, an e-mail and your DNS provider, sets up Docker, and prints the link that creates the first admin account.
+        </p>
+        <CopyCommand command={INSTALL_COMMAND} label="the install command" />
+        <p class="aside">
+          <a href="/docs/install/#reading-the-installer-first">Read the script before running it</a>, or
+          <a href="/docs/install/#a-local-install">try Spawner in a local VM</a>, without a domain.
+        </p>
+      </li>
+      <li>
+        <h3>Install the CLI and log in</h3>
+        <p>
+          On your machine, with Node.js 20 or later. Then run <code>spawner login</code> with the dashboard’s address,
+          <code>spawner.preview.example.com</code> for that domain: it opens the dashboard, where you enter the code it shows.
+        </p>
+        <CopyCommand command="npm install -g spawner-cli" label="the command that installs the CLI" />
+      </li>
+      <li>
+        <h3>Add the project</h3>
+        <p>
+          In the dashboard, an admin opens <strong>Projects</strong>, then <strong>New project</strong>: a slug, the repository, and for a monorepo
+          the directory that holds <code>.spawner/</code>.
+        </p>
+      </li>
+      <li>
+        <h3>Start its first environment</h3>
+        <p>
+          In the project: <code>init</code> writes <code>.spawner/</code> (add <code>--project</code> with the slug if it is not the directory’s
+          name), <code>up</code> starts the environment of the branch.
+        </p>
+        <CopyCommand command="spawner init && spawner up --wait" label="the command that starts a first environment" />
+      </li>
+    </ol>
+    <p class="more">
+      <a href="/docs/quickstart/">The quickstart</a> goes through each step.
+      {
+        isRelease(source) && (
+          <>
+            The latest release is Spawner {source.version}: <a href="/changelog/">what changed</a>.
+          </>
+        )
+      }
+    </p>
+  </div>
+</section>
+
+<style>
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 52rem;
+    margin: 2.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+
+  li {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-left: 3rem;
+    counter-increment: step;
+  }
+
+  li::before {
+    content: counter(step);
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--sp-accent-border);
+    border-radius: 50%;
+    background: var(--sp-accent-soft);
+    color: var(--sp-accent-text);
+    font-size: 0.9375rem;
+    font-weight: 700;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 2rem;
+  }
+
+  li p {
+    color: var(--sp-text-2);
+    font-size: 0.9375rem;
+  }
+
+  li strong {
+    color: var(--sp-text);
+  }
+
+  .aside {
+    font-size: 0.875rem;
+  }
+
+  .more {
+    max-width: 52rem;
+    margin-top: 2.25rem;
+    color: var(--sp-text-2);
+    font-size: 0.9375rem;
+  }
+
+  @media (max-width: 30rem) {
+    li {
+      padding-left: 0;
+    }
+
+    h3 {
+      padding-left: 2.75rem;
+    }
+  }
+</style>

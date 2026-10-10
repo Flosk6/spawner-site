@@ -1,0 +1,94 @@
+---
+/**
+ * The top of the home page: what Spawner is, in the words people search
+ * with, one call to action and one link, and what it costs.
+ */
+import Environments from './Environments.astro';
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="wrap layout">
+    <div class="text">
+      <h1 id="hero-title">Preview environments for every branch, on your own server.</h1>
+      <p class="sub">
+        Spawner is an open source, self-hosted preview environment manager: a copy of your app for each git branch, built from its
+        <a href="/docs/manifest/">Docker Compose file</a>, with its own URLs, database and logs. Developers and coding agents start one with a single
+        command; reviewers open it from a link.
+      </p>
+      <div class="actions">
+        <a class="button" href="#install">Install on your server</a>
+        <a class="docs" href="/docs/">Read the docs</a>
+      </div>
+      <p class="note">Free and open source (Apache-2.0). One Linux server, no Kubernetes.</p>
+    </div>
+    <Environments />
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: 4.5rem 5rem;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 11fr) minmax(0, 12fr);
+    align-items: center;
+    gap: 3.5rem;
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    min-width: 0;
+  }
+
+  h1 {
+    font-size: clamp(2.25rem, 3.9vw, 3rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  .sub {
+    max-width: 36rem;
+    color: var(--sp-text-2);
+    font-size: 1.1875rem;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.6rem;
+  }
+
+  .docs {
+    font-weight: 700;
+  }
+
+  .note {
+    margin-top: -0.6rem;
+    color: var(--sp-text-2);
+    font-size: 0.9375rem;
+  }
+
+  @media (max-width: 64rem) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 3.5rem;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .hero {
+      padding-block: 3rem 4rem;
+    }
+
+    .sub {
+      font-size: 1.125rem;
+    }
+  }
+</style>

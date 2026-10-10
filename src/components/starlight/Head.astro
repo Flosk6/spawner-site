@@ -1,0 +1,15 @@
+---
+/**
+ * Starlight's head, plus a preload of the fonts the docs show first,
+ * so that the text does not move when they arrive.
+ */
+import chakraPetch from '@fontsource/chakra-petch/files/chakra-petch-latin-700-normal.woff2?url';
+import overpassMonoLatin from '@fontsource-variable/overpass-mono/files/overpass-mono-latin-wght-normal.woff2?url';
+import overpassLatin from '@fontsource-variable/overpass/files/overpass-latin-wght-normal.woff2?url';
+import Default from '@astrojs/starlight/components/Head.astro';
+---
+
+<Default />
+<link rel="preload" href={overpassLatin} as="font" type="font/woff2" crossorigin />
+<link rel="preload" href={overpassMonoLatin} as="font" type="font/woff2" crossorigin />
+<link rel="preload" href={chakraPetch} as="font" type="font/woff2" crossorigin />

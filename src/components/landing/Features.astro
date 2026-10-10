@@ -1,0 +1,102 @@
+---
+/**
+ * What sets Spawner apart from hosted previews and from tools built on
+ * Kubernetes, as a list of plain statements, each with the page of the docs
+ * that backs it. Every claim holds for the release the site describes.
+ */
+const features = [
+  {
+    title: 'Previews of work nobody has pushed',
+    text: '<code>spawner up</code> sends the worktree, uncommitted changes included, so a developer or an agent tests a change before pushing it. Branches, tags and commits work too, from the CLI or the dashboard.',
+    link: { href: '/docs/cli/#up', label: 'spawner up' },
+  },
+  {
+    title: 'A CLI and an MCP server for coding agents',
+    text: 'Commands print JSON with <code>--json</code> and exit with codes an agent can act on: 4 when the environment failed, 6 when the quota or the capacity is reached, 7 when <code>.spawner/</code> was refused. <code>spawner mcp</code> gives Claude Code, Codex or Cursor nine tools, from <code>spawner_up</code> to <code>spawner_down</code>.',
+    link: { href: '/docs/agents/', label: 'Set up your agents' },
+  },
+  {
+    title: 'One server, no Kubernetes',
+    text: 'Docker Compose behind Traefik, on a Linux server of yours. Environments nobody uses for 2 hours sleep, and wake up on the next visit; Spawner measures what they really use and says how many more fit. The Laravel, Next.js and MySQL example runs in about 320 MiB.',
+    link: { href: '/docs/manifest/#making-environments-cheap', label: 'Making environments cheap' },
+  },
+  {
+    title: 'Checked before it runs, protected once it does',
+    text: 'Every compose file goes through an allowlist: no host mounts, privileged containers, host network or Docker socket. Each environment gets its own network, away from the cloud’s metadata and the server’s services, and its URLs need your team’s login; guests get a share link. Branches still run code nobody reviewed: give Spawner a server of its own.',
+    link: { href: '/docs/security/', label: 'What it protects, and what it leaves to you' },
+  },
+  {
+    title: 'Accounts without passwords',
+    text: 'Invitations and passkeys, GitHub login if you want it, two roles, tokens with scopes and an expiry, and an audit trail of who did what.',
+    link: { href: '/docs/security/#access', label: 'Access' },
+  },
+];
+---
+
+<section class="section" id="features" aria-labelledby="features-title">
+  <div class="wrap">
+    <h2 class="section-title" id="features-title">What Spawner does differently</h2>
+    <dl class="list">
+      {
+        features.map((feature) => (
+          <div class="row">
+            <dt>{feature.title}</dt>
+            <dd>
+              <p set:html={feature.text} />
+              <a href={feature.link.href}>{feature.link.label}</a>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>
+
+<style>
+  .list {
+    max-width: 62rem;
+    margin-top: 2.25rem;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 8fr);
+    gap: 0.5rem 2.5rem;
+    padding-block: 1.4rem;
+    border-top: 1px solid var(--sp-border);
+  }
+
+  .row:last-child {
+    border-bottom: 1px solid var(--sp-border);
+  }
+
+  dt {
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  dd {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  p {
+    color: var(--sp-text-2);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  a {
+    font-size: 0.9375rem;
+    font-weight: 700;
+  }
+
+  @media (max-width: 48rem) {
+    .row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

@@ -1,0 +1,136 @@
+---
+/**
+ * A shell command with a button that copies it. The command wraps rather
+ * than scrolls, so that it reads whole without a scrollbar, but only where a
+ * line of shell would: between words, and inside a URL after a slash. An
+ * operator (`|`, `&&`) stays at the end of the line of the word before it,
+ * so that a pipe never starts a line, where it would pass for a text cursor.
+ * The button copies the command as written; without JavaScript it is hidden,
+ * and the command can still be selected.
+ */
+interface Props {
+  command: string;
+  /** What the command is, for the button's accessible name: "the install command". */
+  label: string;
+}
+
+const { command, label } = Astro.props;
+
+const OPERATORS = new Set(['|', '&&', '||', ';']);
+
+/** A word of the command: its parts (a URL splits after each slash), and the operator that follows it. */
+interface Word {
+  parts: string[];
+  operator?: string;
+}
+
+/** Splits a command into its words, each operator joined to the word before it. */
+function words(text: string): Word[] {
+  const result: Word[] = [];
+  for (const token of text.split(/\s+/).filter(Boolean)) {
+    const previous = result.at(-1);
+    if (OPERATORS.has(token) && previous && !previous.operator) {
+      previous.operator = token;
+    } else {
+      result.push({ parts: /^[a-z]+:\/\//.test(token) ? token.split(/(?<=\/)(?!\/)/) : [token] });
+    }
+  }
+  return result;
+}
+
+/** Escapes text for HTML. */
+const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/**
+ * The command as HTML, written without any whitespace between tags, so
+ * that the only spaces are the command's own: a selection copies it as is.
+ */
+const html = words(command)
+  .map((word) => {
+    const last = escape(word.parts.at(-1) ?? '') + (word.operator ? ` ${escape(word.operator)}` : '');
+    const parts = word.parts.slice(0, -1).map((part) => `<span class="part">${escape(part)}</span><wbr>`);
+    return `${parts.join('')}<span class="part">${last}</span>`;
+  })
+  .join(' ');
+---
+
+<div class="command">
+  <code set:html={html} />
+  <button type="button" class="copy" data-command={command} data-js-only><span data-copy-word>Copy</span><span class="sr-only"> {label}</span></button>
+  <span class="sr-only" role="status" data-copy-status></span>
+</div>
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>('button[data-command]')) {
+    const status = button.parentElement?.querySelector<HTMLElement>('[data-copy-status]');
+    const word = button.querySelector<HTMLElement>('[data-copy-word]');
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.command ?? '');
+        if (word) word.textContent = 'Copied';
+        if (status) status.textContent = 'Copied to the clipboard';
+      } catch {
+        const code = button.parentElement?.querySelector('code');
+        if (code) window.getSelection()?.selectAllChildren(code);
+        if (word) word.textContent = 'Selected';
+        if (status) status.textContent = 'The command is selected: copy it with your keyboard';
+      }
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (word) word.textContent = 'Copy';
+        if (status) status.textContent = '';
+      }, 2500);
+    });
+  }
+</script>
+
+<style>
+  .command {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 50rem;
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
+    border: 1px solid var(--sp-border);
+    border-radius: 6px;
+    background: var(--sp-surface);
+  }
+
+  code {
+    flex: 1;
+    min-width: 0;
+    padding-block: 0.3rem;
+    color: var(--sp-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.6;
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+
+  code::before {
+    content: '$ ';
+    color: var(--sp-accent-text);
+  }
+
+  code :global(.part) {
+    white-space: nowrap;
+  }
+
+  .copy {
+    flex: none;
+    min-height: 2.25rem;
+    padding: 0 0.85rem;
+    border: 1px solid var(--sp-border);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--sp-text);
+    font: 600 0.875rem/1 var(--sp-font);
+    cursor: pointer;
+  }
+
+  .copy:hover {
+    border-color: var(--sp-accent-text);
+  }
+</style>

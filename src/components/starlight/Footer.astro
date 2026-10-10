@@ -1,0 +1,84 @@
+---
+/**
+ * Starlight's footer, plus what an open source docs page owes its readers:
+ * the page in Markdown, its source on GitHub (Starlight's edit link), when
+ * it last changed, then the version the pages describe, the license, the
+ * comparison with other tools and the legal notice.
+ */
+import EditLink from '@astrojs/starlight/components/EditLink.astro';
+import LastUpdated from '@astrojs/starlight/components/LastUpdated.astro';
+import Pagination from '@astrojs/starlight/components/Pagination.astro';
+import { Icon } from '@astrojs/starlight/components';
+import { markdownPath } from '../../lib/docs-pages';
+import { docsSource } from '../../lib/docs-source';
+import { versionSentence } from '../../lib/llms';
+import { LICENSE_URL } from '../../lib/site';
+
+const markdown = markdownPath(Astro.locals.starlightRoute.entry.id);
+const version = versionSentence(docsSource());
+---
+
+<footer class="sl-flex">
+  <div class="meta sl-flex">
+    <div class="sources sl-flex">
+      <EditLink />
+      {
+        markdown && (
+          <a href={markdown} type="text/markdown" class="markdown sl-flex print:hidden">
+            <Icon name="document" size="1.2em" />
+            View as Markdown
+          </a>
+        )
+      }
+    </div>
+    <LastUpdated />
+  </div>
+  <Pagination />
+  <p class="about">
+    {version} Spawner is free and open source, under the <a href={LICENSE_URL}>Apache-2.0 license</a>.
+    See <a href="/compare/">how it compares with other tools</a>, and the <a href="/legal/">legal notice</a>.
+  </p>
+</footer>
+
+<style>
+  footer {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .meta {
+    gap: 0.75rem 3rem;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 3rem;
+    font-size: var(--sl-text-sm);
+    color: var(--sp-text-3);
+  }
+  .sources {
+    gap: 0.75rem 2rem;
+    flex-wrap: wrap;
+  }
+  .markdown {
+    gap: 0.5rem;
+    align-items: center;
+    text-decoration: none;
+    color: var(--sp-text-3);
+  }
+  .markdown:hover {
+    color: var(--sp-text);
+  }
+  .about {
+    margin: 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--sp-border);
+    font-size: var(--sl-text-sm);
+    color: var(--sp-text-3);
+  }
+  .about a {
+    color: var(--sp-text-2);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  .about a:hover {
+    color: var(--sp-text);
+  }
+</style>

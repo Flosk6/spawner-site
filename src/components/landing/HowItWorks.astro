@@ -1,0 +1,178 @@
+---
+/**
+ * What adopting Spawner takes, in its real order: the files a project adds,
+ * the command that starts an environment, what the reader then opens. The
+ * manifest shown is the real one of examples/node-postgres in the Spawner
+ * repository, unchanged: update it here when that file changes.
+ */
+import { REPO_URL } from '../../lib/site';
+
+const MANIFEST = `version: 1
+project: example
+exposures:
+  - name: web
+    service: app
+    port: 3000
+seed:
+  - service: app
+    run: [node, seed.js]
+ttl: 24h`;
+
+/** Escapes text for HTML. */
+const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/** The manifest as HTML, its keys marked so that they read apart from their values. */
+const manifestHtml = MANIFEST.split('\n')
+  .map((line) => {
+    const match = /^(\s*(?:- )?)([a-z_]+)(:)(.*)$/.exec(line);
+    return match ? `${escape(match[1])}<span class="key">${match[2]}</span>${match[3]}${escape(match[4])}` : escape(line);
+  })
+  .join('\n');
+---
+
+<section class="section" id="how-it-works" aria-labelledby="how-title">
+  <div class="wrap layout">
+    <div class="text">
+      <h2 class="section-title" id="how-title">How it works</h2>
+      <p class="section-lede">
+        Spawner builds each preview environment (also called an ephemeral environment or a review app) from what the repository already has: its
+        Docker Compose file, plus a short manifest.
+      </p>
+      <ol class="steps">
+        <li>
+          <h3>Add <code>.spawner/</code> to the repository</h3>
+          <p><code>spawner init</code> writes the manifest, which names the URLs and the seed, and a Docker Compose file to adjust.</p>
+        </li>
+        <li>
+          <h3>Start an environment</h3>
+          <p>
+            <code>spawner up</code> from a worktree, uncommitted changes included, or a branch from the dashboard. Spawner checks the compose file
+            against its policy, builds and starts it on a network of its own, and runs the seed.
+          </p>
+        </li>
+        <li>
+          <h3>Open it</h3>
+          <p>
+            Traefik routes <code>&lt;env&gt;--&lt;project&gt;.&lt;domain&gt;</code> with HTTPS, behind your team’s login; guests get a share
+            link. After 2&nbsp;hours unused it sleeps, and the next visit wakes it up.
+          </p>
+        </li>
+      </ol>
+    </div>
+    <figure class="manifest">
+      <pre><code set:html={manifestHtml} /></pre>
+      <figcaption>
+        <a href={`${REPO_URL}/blob/master/examples/node-postgres/.spawner/spawner.yaml`}><code>.spawner/spawner.yaml</code></a> of
+        <a href="/docs/examples/">the Node.js and PostgreSQL example</a>, next to a regular <code>compose.yaml</code>. Every key is in
+        <a href="/docs/manifest/">the manifest reference</a>.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: center;
+    gap: 3.5rem;
+  }
+
+  .text {
+    min-width: 0;
+  }
+
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 2.25rem 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+
+  .steps li {
+    position: relative;
+    padding-left: 3rem;
+    counter-increment: step;
+  }
+
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--sp-accent-border);
+    border-radius: 50%;
+    background: var(--sp-accent-soft);
+    color: var(--sp-accent-text);
+    font-size: 0.9375rem;
+    font-weight: 700;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 2rem;
+  }
+
+  .steps p {
+    margin-top: 0.2rem;
+    color: var(--sp-text-2);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  .manifest {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  pre {
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--sp-border);
+    border-radius: 8px;
+    background: var(--sp-surface);
+    color: var(--sp-text);
+    font-family: var(--sp-font-mono);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+
+  pre code {
+    font-size: inherit;
+  }
+
+  pre :global(.key) {
+    color: var(--sp-accent-text);
+    font-weight: 600;
+  }
+
+  figcaption {
+    color: var(--sp-text-3);
+    font-size: 0.875rem;
+  }
+
+  figcaption a {
+    color: var(--sp-text-2);
+  }
+
+  figcaption a:hover {
+    color: var(--sp-text);
+  }
+
+  @media (max-width: 56rem) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2.5rem;
+    }
+  }
+</style>

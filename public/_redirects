@@ -1,0 +1,16 @@
+# Permanent redirects of pages that moved (Cloudflare Workers static assets).
+# A source matches its path exactly, so each page is listed with and without
+# its trailing slash. These run before the files and the trailing slash
+# handling of wrangler.jsonc. www.spawner.run and http:// are redirected by
+# the rules of the Cloudflare zone: this file only sees paths.
+
+# Pages of Spawner 2.0.0 that 2.1.0 removed: the comparison moved to this
+# site, the advice on density into the manifest page
+/docs/comparison /compare/ 301
+/docs/comparison/ /compare/ 301
+/docs/density /docs/manifest/#making-environments-cheap 301
+/docs/density/ /docs/manifest/#making-environments-cheap 301
+
+# The API reference, on master between 2.0.0 and 2.1.0, never in a release
+/docs/api /docs/cli/ 301
+/docs/api/ /docs/cli/ 301

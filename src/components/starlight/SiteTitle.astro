@@ -1,0 +1,20 @@
+---
+import Wordmark from '../Wordmark.astro';
+
+const { siteTitleHref } = Astro.locals.starlightRoute;
+---
+
+<a href={siteTitleHref} class="site-title">
+  <Wordmark />
+</a>
+
+<style>
+  .site-title {
+    display: flex;
+    align-items: center;
+    color: var(--sl-color-white);
+    font-size: 1.625rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+</style>

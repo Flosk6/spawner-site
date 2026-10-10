@@ -1,0 +1,82 @@
+---
+/**
+ * The questions people ask before they install, each a disclosure that opens
+ * without JavaScript. The text is in the page, open or closed, for readers,
+ * search engines and the page's FAQPage structured data alike.
+ */
+import { answerHtml, faq } from '../../data/faq';
+---
+
+<section class="section section-alt" id="faq" aria-labelledby="faq-title">
+  <div class="wrap">
+    <h2 class="section-title" id="faq-title">Frequently asked questions</h2>
+    <div class="list">
+      {
+        faq.map((item) => (
+          <details>
+            <summary>{item.question}</summary>
+            <p set:html={answerHtml(item.answer)} />
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .list {
+    max-width: 50rem;
+    margin-top: 2.25rem;
+    border-bottom: 1px solid var(--sp-border);
+  }
+
+  details {
+    border-top: 1px solid var(--sp-border);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 3.5rem;
+    padding-block: 0.9rem;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.4;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::after {
+    content: '';
+    flex: none;
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-right: 0.3rem;
+    border-right: 2px solid var(--sp-text-2);
+    border-bottom: 2px solid var(--sp-text-2);
+    transform: translateY(-0.15rem) rotate(45deg);
+    transition: transform 0.15s ease;
+  }
+
+  details[open] summary::after {
+    transform: translateY(0.15rem) rotate(-135deg);
+  }
+
+  summary:hover {
+    color: var(--sp-accent-text);
+  }
+
+  p {
+    max-width: 44rem;
+    padding-bottom: 1.25rem;
+    color: var(--sp-text-2);
+    font-size: 0.9375rem;
+    line-height: 1.65;
+  }
+</style>
